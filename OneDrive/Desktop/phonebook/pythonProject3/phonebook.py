@@ -14,11 +14,12 @@
 #не должна быть линейной
 
 
+
 def choose_action(phonebook):
     while True:
         print('Меню:')
-        user_choice = input('1 - Открыть справочник\n2 - Просмотреть все контакты\n3 - Найти контакт\n4 - Добавить контакт\n\
-5 - Изменить контакт\n6 - Удалить контакт\n0 - Выйти из приложения\n')
+        user_choice = input('1 - Открыть другой справочник\n2 - Просмотреть все контакты\n3 - Найти контакт\n4 - Добавить контакт\n\
+5 - Изменить контакт\n6 - Удалить контакт\n7 - Экспортировать\импортировать контакт\n0 - Выйти из приложения\n')
         print()
         if user_choice == '1':
             file_to_add = input('Введите название импортируемого файла: ')
@@ -34,6 +35,12 @@ def choose_action(phonebook):
             change_phone_number(phonebook)
         elif user_choice == '6':
             delete_contact(phonebook)
+        elif user_choice == '7':
+            source_file = input('Введите имя файла ,откуда экспортировать: ')
+            destination_file = input('Введите имя файла куда надо экспортировать: ')
+            search_parameter = input('0 - Поиск по имени\n1 - Поиск по фамилии\n2 - Поиск по номеру\n3 - Поиск по комментарию:\n')
+            search_value = input('Введите значение: ')
+            export_contact(source_file, destination_file, search_parameter, search_value)
         elif user_choice == '0':
             print('До свидания!')
             break
@@ -183,6 +190,52 @@ def print_contacts(contact_list: list):
         print()
 
 
+def export_contact(source_file, destination_file, search_parameter, search_value):
+    contact_list = read_file_to_list(source_file)
+    search_result = []
+    for contact in contact_list:
+        if contact[1] == search_value:  # Поиск по фамилии (если параметр - "фамилия")
+            search_result.append(contact)
+        elif contact[0] == search_value:  # Поиск по имени (если параметр - "имя")
+            search_result.append(contact)
+        elif contact[2] == search_value:  # Поиск по телефону (если параметр - "телефон")
+            search_result.append(contact)
+        elif contact[3] == search_value:  # Поиск по комментарию (если параметр - "комментарий")
+            search_result.append(contact)
+
+    if len(search_result) == 1:
+        with open(destination_file, 'r', encoding='utf-8') as file:
+            existing_contacts = file.readlines()
+            existing_contacts = [contact.strip() for contact in existing_contacts]
+            new_contact = ' '.join(search_result[0])
+            if new_contact in existing_contacts:
+                print("Такой контакт уже есть в справочнике.")
+            else:
+                with open(destination_file, 'a', encoding='utf-8') as file:
+                    line = new_contact + '\n'
+                    file.write(line)
+                print("Контакт успешно экспортирован.")
+    elif len(search_result) > 1:
+        print('Найдено несколько контактов:')
+        for i in range(len(search_result)):
+            print(f'{i + 1} - {search_result[i]}')
+        num_count = int(input('Выберите номер контакта, который нужно экспортировать: '))
+        with open(destination_file, 'r', encoding='utf-8') as file:
+            existing_contacts = file.readlines()
+            existing_contacts = [contact.strip() for contact in existing_contacts]
+            new_contact = ' '.join(search_result[num_count - 1])
+            if new_contact in existing_contacts:
+                print("Такой контакт уже есть в справочнике.")
+            else:
+                with open(destination_file, 'a', encoding='utf-8') as file:
+                    line = new_contact + '\n'
+                    file.write(line)
+                print("Контакт успешно экспортирован.")
+    else:
+        print('Контакт не найден.')
+
+
+
 if __name__ == '__main__':
-    file = 'Phonebook.txt'
+    file = input('Введите имя справочника для открытия, в формате name.txt: ')
     choose_action(file)
